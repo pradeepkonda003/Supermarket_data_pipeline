@@ -213,7 +213,7 @@ if __name__ == "__main__":
     import extract
     
     # Bronze → Silver Pipeline
-    df_bronze = extract.load_to_bronze("supermarket_sales.csv")
+    df_bronze = extract.extract_data("supermarket_sales.csv")
     if df_bronze is not None:
         silver = SilverLayer(df_bronze)
         df_silver = silver.process_to_silver()

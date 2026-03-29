@@ -19,10 +19,10 @@ class DataQualityValidator:
         total_nulls = null_counts.sum()
         
         if total_nulls == 0:
-            print("  ✓ Status: PASSED - No null values found")
+            print("    Status: PASSED - No null values found")
             self.quality_metrics['null_check'] = "PASSED"
         else:
-            print(f"  ⚠ Status: WARNING - Found {total_nulls} null values")
+            print(f"    Status: WARNING - Found {total_nulls} null values")
             print("  Null distribution:")
             for col, count in null_counts[null_counts > 0].items():
                 print(f"    {col}: {count} nulls ({count/len(self.df)*100:.1f}%)")
@@ -35,17 +35,17 @@ class DataQualityValidator:
         print(f"\n[QUALITY CHECK] Duplicate Records Detection ({key_column})")
         
         if key_column not in self.df.columns:
-            print(f"  ⚠ Column '{key_column}' not found")
+            print(f"    Column '{key_column}' not found")
             return 0
         
         dup_count = self.df[key_column].duplicated().sum()
         dup_percentage = (dup_count / len(self.df) * 100) if len(self.df) > 0 else 0
         
         if dup_count == 0:
-            print(f"  ✓ Status: PASSED - No duplicates found")
+            print(f"    Status: PASSED - No duplicates found")
             self.quality_metrics['duplicate_check'] = "PASSED"
         else:
-            print(f"  ⚠ Status: WARNING - Found {dup_count} duplicates ({dup_percentage:.2f}%)")
+            print(f"    Status: WARNING - Found {dup_count} duplicates ({dup_percentage:.2f}%)")
             self.quality_metrics['duplicate_check'] = "WARNING"
         
         return dup_count
@@ -68,10 +68,10 @@ class DataQualityValidator:
                     total_negatives += neg_count
         
         if len(issues) == 0:
-            print("  ✓ Status: PASSED - No negative values found")
+            print("    Status: PASSED - No negative values found")
             self.quality_metrics['negative_check'] = "PASSED"
         else:
-            print(f"  ⚠ Status: WARNING - Found {total_negatives} negative values")
+            print(f"    Status: WARNING - Found {total_negatives} negative values")
             for col, count in issues.items():
                 print(f"    {col}: {count} negative values")
             self.quality_metrics['negative_check'] = "WARNING"
@@ -93,10 +93,10 @@ class DataQualityValidator:
         extra_cols = [col for col in self.df.columns if col not in expected_columns]
         
         if len(missing_cols) == 0:
-            print(f"  ✓ Status: PASSED - All expected columns present")
+            print(f"    Status: PASSED - All expected columns present")
             self.quality_metrics['schema_check'] = "PASSED"
         else:
-            print(f"  ⚠ Status: WARNING - Missing columns: {missing_cols}")
+            print(f"    Status: WARNING - Missing columns: {missing_cols}")
             self.quality_metrics['schema_check'] = "WARNING"
         
         if len(extra_cols) > 0:
@@ -125,7 +125,7 @@ class DataQualityValidator:
                 type_match = any(exp in actual_type for exp in expected)
                 print(f"  {col}: {actual_type}")
         
-        print(f"  ✓ Status: Data types logged")
+        print(f"    Status: Data types logged")
         self.quality_metrics['data_types'] = "CHECKED"
         
         return self.df.dtypes
@@ -138,10 +138,10 @@ class DataQualityValidator:
         missing_scd = [col for col in scd_cols if col not in self.df.columns]
         
         if len(missing_scd) == 0:
-            print("  ✓ Status: PASSED - All SCD Type-2 columns present")
+            print("    Status: PASSED - All SCD Type-2 columns present")
             self.quality_metrics['scd_type_2'] = "PASSED"
         else:
-            print(f"  ⚠ Status: WARNING - Missing SCD columns: {missing_scd}")
+            print(f"    Status: WARNING - Missing SCD columns: {missing_scd}")
             self.quality_metrics['scd_type_2'] = "WARNING"
         
         return missing_scd
@@ -154,7 +154,7 @@ class DataQualityValidator:
         missing_cdc = [col for col in cdc_cols if col not in self.df.columns]
         
         if len(missing_cdc) == 0:
-            print("  ✓ Status: PASSED - All CDC columns present")
+            print("    Status: PASSED - All CDC columns present")
             
             # Check CDC operation values
             if 'cdc_operation' in self.df.columns:
@@ -163,7 +163,7 @@ class DataQualityValidator:
             
             self.quality_metrics['cdc'] = "PASSED"
         else:
-            print(f"  ⚠ Status: WARNING - Missing CDC columns: {missing_cdc}")
+            print(f"    Status: WARNING - Missing CDC columns: {missing_cdc}")
             self.quality_metrics['cdc'] = "WARNING"
         
         return missing_cdc
@@ -197,7 +197,7 @@ class DataQualityValidator:
         
         print(f"\nQuality Checks:")
         for check, status in sorted(self.quality_metrics.items()):
-            status_symbol = "✓" if status == "PASSED" else "⚠" if status == "WARNING" else "ℹ"
+            status_symbol = " " if status == "PASSED" else " " if status == "WARNING" else "ℹ"
             print(f"  {status_symbol} {check.upper()}: {status}")
         
         # Overall status
@@ -206,9 +206,9 @@ class DataQualityValidator:
         print(f"\nOverall Quality: {passed}/{total} checks passed")
         
         if passed == total:
-            print("✓ Data quality APPROVED for downstream processing")
+            print("  Data quality APPROVED for downstream processing")
         else:
-            print("⚠ Data quality concerns detected - review recommended")
+            print("  Data quality concerns detected - review recommended")
         
         print("="*70 + "\n")
     
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     import silver
     
     # Example: Silver Layer Quality Validation
-    df_bronze = extract.load_to_bronze("supermarket_sales.csv")
+    df_bronze = extract.extract_data("supermarket_sales.csv")
     if df_bronze is not None:
         silver_layer = silver.SilverLayer(df_bronze)
         df_silver = silver_layer.process_to_silver()
@@ -253,19 +253,11 @@ def run_quality_checks(df):
     print("=" * 60)
     print("DATA QUALITY CHECKS")
     print("=" * 60)
-    
-    # Check for null values
-    null_results = check_null_values(df)
-    
-    # Check for duplicates
-    dup_results = check_duplicates(df)
-    
-    # Check for negative values
-    neg_results = check_negative_values(df, numeric_columns=['Quantity', 'Total', 'Tax 5%', 'Unit price'])
-    
-    # Check data types
-    dtype_results = check_data_types(df)
-    
+    validator = DataQualityValidator(df)
+    null_results = validator.check_null_values()
+    dup_results  = validator.check_duplicates()
+    neg_results  = validator.check_negative_values(numeric_columns=['Quantity','Total','Tax 5%','Unit price'])
+    dtype_results = validator.check_data_types()
     print("\n" + "=" * 60)
     print("QUALITY CHECK SUMMARY")
     print("=" * 60)
